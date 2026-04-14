@@ -18,7 +18,29 @@ import { AddGradeDto, StudentGradeDto } from '../../shared/models/enrollment';
   selector: 'app-grades',
   templateUrl: './grades.component.html',
   styles: [
-    ".card { border-radius: 1rem; }"
+    ".grades-shell { padding: 2rem; max-width: 1200px; margin: 0 auto; }",
+    ".page-header { margin-bottom: 1.5rem; }",
+    ".page-header h1 { font-size: 2rem; margin-bottom: 0.35rem; color: #102a43; }",
+    ".page-header p { color: #475569; margin: 0; }",
+    ".top-grid { display: grid; gap: 1.5rem; grid-template-columns: 1.2fr 0.8fr; }",
+    ".panel { padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 1.25rem; background: #ffffff; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }",
+    ".panel-secondary { background: #f8fafc; }",
+    ".panel h2 { font-size: 1.15rem; margin-bottom: 1rem; color: #0f172a; }",
+    ".field-row { display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 1rem; }",
+    ".field-row label { font-weight: 600; color: #334155; }",
+    ".form-select, .form-control { border-radius: 0.85rem; border: 1px solid #cbd5e1; padding: 0.9rem 1rem; }",
+    ".button-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }",
+    ".button-row .btn { min-width: 140px; }",
+    ".selection-summary { margin-top: 1rem; color: #334155; display: grid; gap: 0.35rem; font-size: 0.95rem; }",
+    ".status-banner { margin: 1rem 0; }",
+    ".grades-table { margin-top: 1.5rem; }",
+    ".grades-table h2 { margin-bottom: 1rem; }",
+    ".table-scroll { overflow-x: auto; }",
+    ".table { width: 100%; border-collapse: collapse; }",
+    ".table thead th { text-align: left; padding: 1rem 0.75rem; border-bottom: 1px solid #e2e8f0; color: #334155; }",
+    ".table tbody td { padding: 0.95rem 0.75rem; border-bottom: 1px solid #e2e8f0; }",
+    ".grade-column { width: 180px; }",
+    "@media (max-width: 900px) { .top-grid { grid-template-columns: 1fr; } .button-row { width: 100%; } .button-row .btn { width: 100%; } }"
   ]
 })
 export class GradesComponent implements OnInit {
@@ -142,12 +164,16 @@ export class GradesComponent implements OnInit {
         next: () => {
           this.enrollmentMessage = 'Student enrolled successfully.';
           this.enrollmentError = '';
+
           if (
-            this.selectedEnrollmentCourseId === this.selectedCourseId &&
-            this.selectedEnrollmentDepartmentId === this.selectedDepartmentId
+            this.selectedEnrollmentCourseId !== this.selectedCourseId ||
+            this.selectedEnrollmentDepartmentId !== this.selectedDepartmentId
           ) {
-            this.loadStudents();
+            this.selectedCourseId = this.selectedEnrollmentCourseId;
+            this.selectedDepartmentId = this.selectedEnrollmentDepartmentId;
           }
+
+          this.loadStudents();
         },
         error: (err) => (this.enrollmentError = err?.error?.message || 'Unable to enroll student.')
       });

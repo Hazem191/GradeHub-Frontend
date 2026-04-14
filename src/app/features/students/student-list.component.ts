@@ -58,13 +58,13 @@ export class StudentListComponent implements OnInit {
     this.loadData();
   }
 
-  loadData(): void {
-    this.appDataService.loadDepartments().subscribe({
+  loadData(forceReload = false): void {
+    this.appDataService.loadDepartments(forceReload).subscribe({
       next: (departments) => (this.departments = departments),
       error: (err) => (this.error = err?.error?.message || 'Could not load departments.')
     });
 
-    this.appDataService.loadStudents().subscribe({
+    this.appDataService.loadStudents(forceReload).subscribe({
       next: (students) => (this.students = students),
       error: (err) => (this.error = err?.error?.message || 'Could not load students.')
     });
@@ -96,7 +96,7 @@ export class StudentListComponent implements OnInit {
       this.studentService.updateStudent(this.selectedStudent.id, payloadToUpdate).subscribe({
         next: () => {
           this.resetForm();
-          this.loadData();
+          this.loadData(true);
         },
         error: (err) => (this.error = err?.error?.message || 'Unable to update student.')
       });
@@ -109,7 +109,7 @@ export class StudentListComponent implements OnInit {
       this.studentService.createStudent(payloadToCreate).subscribe({
         next: () => {
           this.resetForm();
-          this.loadData();
+          this.loadData(true);
         },
         error: (err) => (this.error = err?.error?.message || 'Unable to create student.')
       });
@@ -121,7 +121,7 @@ export class StudentListComponent implements OnInit {
       return;
     }
     this.studentService.deleteStudent(id).subscribe({
-      next: () => this.loadData(),
+      next: () => this.loadData(true),
       error: (err) => (this.error = err?.error?.message || 'Unable to delete student.')
     });
   }

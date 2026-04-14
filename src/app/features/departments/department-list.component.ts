@@ -28,10 +28,14 @@ import { CourseService } from '../courses/course.service';
     "label { display:block; margin-bottom:1rem; font-size:.95rem; color:#334155; }",
     "input { width:100%; margin-top:.5rem; padding:.85rem 1rem; border:1px solid #cbd5e1; border-radius:12px; }",
     ".form-actions { display:flex; gap:.75rem; margin-top:1rem; }",
-    ".assignment-panel { margin-top:1.5rem; }",
-    ".assign-grid { display:grid; gap:1rem; grid-template-columns:1fr 1fr; }",
-    ".checkbox-list { display:flex; flex-direction:column; gap:.6rem; margin-bottom:1rem; max-height:260px; overflow:auto; padding-right:.5rem; }",
-    "label input { margin-right:.65rem; }",
+    ".assign-grid { display:grid; gap:1rem; grid-template-columns:1fr 1fr; margin-top:1rem; }",
+    ".assign-panel { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:1rem; display:flex; flex-direction:column; gap:1rem; min-height:360px; }",
+    ".checkbox-list { display:flex; flex-direction:column; gap:.75rem; margin-bottom:1rem; max-height:280px; overflow:auto; padding-right:.5rem; }",
+    ".checkbox-item { display:flex; align-items:center; gap:.75rem; padding:.8rem 1rem; border:1px solid #e2e8f0; border-radius:12px; background:#ffffff; }",
+    ".checkbox-item input { flex-shrink:0; margin:0; width:1.05rem; height:1.05rem; }",
+    ".checkbox-item label { margin:0; font-weight:500; color:#0f172a; cursor:pointer; }",
+    ".assign-panel h6 { font-size:1rem; font-weight:700; margin-bottom:.75rem; }",
+    ".assign-panel button { margin-top:auto; }",
     ".primary { background:#0f766e; }",
     ".error { color:#b91c1c; margin-top:1rem; }",
     "@media (max-width: 980px) { .grid-layout, .assign-grid { grid-template-columns:1fr; } }"
@@ -68,15 +72,15 @@ export class DepartmentListComponent implements OnInit {
     this.loadData();
   }
 
-  loadData(): void {
-    this.appDataService.loadDepartments().subscribe({
+  loadData(forceReload = false): void {
+    this.appDataService.loadDepartments(forceReload).subscribe({
       next: (departments) => {
         this.departments = departments;
         this.updateCourseLists();
       },
       error: (err) => (this.error = err?.error?.message || 'Unable to load departments.')
     });
-    this.appDataService.loadCourses().subscribe({
+    this.appDataService.loadCourses(forceReload).subscribe({
       next: (courses) => {
         this.courses = courses;
         this.updateCourseLists();
@@ -103,7 +107,7 @@ export class DepartmentListComponent implements OnInit {
       this.departmentService.updateDepartment(this.selectedDepartment.id, payload).subscribe({
         next: () => {
           this.clearSelection();
-          this.loadData();
+          this.loadData(true);
         },
         error: (err) => (this.error = err?.error?.message || 'Unable to update department.')
       });
@@ -111,7 +115,7 @@ export class DepartmentListComponent implements OnInit {
       this.departmentService.createDepartment(payload).subscribe({
         next: () => {
           this.departmentForm.reset();
-          this.loadData();
+          this.loadData(true);
         },
         error: (err) => (this.error = err?.error?.message || 'Unable to create department.')
       });
@@ -125,7 +129,7 @@ export class DepartmentListComponent implements OnInit {
     this.departmentService.deleteDepartment(id).subscribe({
       next: () => {
         this.clearSelection();
-        this.loadData();
+        this.loadData(true);
       },
       error: (err) => (this.error = err?.error?.message || 'Unable to delete department.')
     });
@@ -150,7 +154,7 @@ export class DepartmentListComponent implements OnInit {
     this.departmentService.assignCourses({ departmentId: this.selectedDepartment.id, courseIds: this.assignCourseIds }).subscribe({
       next: () => {
         this.assignCourseIds = [];
-        this.loadData();
+        this.loadData(true);
       },
       error: (err) => (this.error = err?.error?.message || 'Unable to assign courses.')
     });
@@ -163,7 +167,7 @@ export class DepartmentListComponent implements OnInit {
     this.departmentService.removeCourses({ departmentId: this.selectedDepartment.id, courseIds: this.removeCourseIds }).subscribe({
       next: () => {
         this.removeCourseIds = [];
-        this.loadData();
+        this.loadData(true);
       },
       error: (err) => (this.error = err?.error?.message || 'Unable to remove courses.')
     });

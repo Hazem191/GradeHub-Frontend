@@ -1,102 +1,111 @@
-<section class="container py-4">
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
-        <div>
-          <h1 class="h4 mb-1">Gradebook</h1>
-          <p class="text-muted mb-0">Assign or update grades for students in a course and department.</p>
-        </div>
-      </div>
-
-      <div class="row g-3 mb-4 align-items-end">
-        <div class="col-md-5">
-          <label class="form-label">Course</label>
-          <select class="form-select" (change)="onCourseChange($any($event.target).value)" [disabled]="isLoadingCourses">
-            <option value="">Select course</option>
-            <option *ngFor="let course of courses" [value]="course.id">{{ course.name }}</option>
-          </select>
-          <div *ngIf="isLoadingCourses" class="form-text text-muted">Loading courses...</div>
-        </div>
-        <div class="col-md-5">
-          <label class="form-label">Department</label>
-          <select class="form-select" (change)="onDepartmentChange($any($event.target).value)" [disabled]="isLoadingDepartments">
-            <option value="">Select department</option>
-            <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
-          </select>
-          <div *ngIf="isLoadingDepartments" class="form-text text-muted">Loading departments...</div>
-        </div>
-        <div class="col-md-2 d-grid">
-          <button class="btn btn-outline-primary" type="button" (click)="loadStudents()">Refresh students</button>
-        </div>
-      </div>
-
-      <div class="card border-secondary mb-4">
-        <div class="card-body">
-          <h2 class="h6 mb-3">Enroll a student</h2>
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label">Student</label>
-              <select class="form-select" [(ngModel)]="selectedEnrollmentStudentId" name="enrollmentStudent">
-                <option [ngValue]="null">Select student</option>
-                <option *ngFor="let student of studentsForEnrollment" [ngValue]="student.id">{{ student.name }}</option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Course</label>
-              <select class="form-select" [(ngModel)]="selectedEnrollmentCourseId" name="enrollmentCourse">
-                <option [ngValue]="null">Select course</option>
-                <option *ngFor="let course of courses" [ngValue]="course.id">{{ course.name }}</option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Department</label>
-              <select class="form-select" [(ngModel)]="selectedEnrollmentDepartmentId" name="enrollmentDepartment">
-                <option [ngValue]="null">Select department</option>
-                <option *ngFor="let department of departments" [ngValue]="department.id">{{ department.name }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-success" type="button" (click)="enrollStudent()" [disabled]="isEnrolling">
-              {{ isEnrolling ? 'Enrolling…' : 'Enroll student' }}
-            </button>
-            <button class="btn btn-outline-secondary" type="button" (click)="selectedEnrollmentStudentId = null; selectedEnrollmentCourseId = null; selectedEnrollmentDepartmentId = null; enrollmentError = ''; enrollmentMessage = '';">Clear</button>
-          </div>
-          <div *ngIf="enrollmentMessage" class="alert alert-success mt-3">{{ enrollmentMessage }}</div>
-          <div *ngIf="enrollmentError" class="alert alert-danger mt-3">{{ enrollmentError }}</div>
-        </div>
-      </div>
-
-      <div *ngIf="isLoadingStudents" class="alert alert-info">Loading students for selected course and department...</div>
-      <div *ngIf="!isLoadingStudents && info" class="alert alert-info">{{ info }}</div>
-
-      <div *ngIf="students.length > 0" class="table-responsive">
-        <table class="table table-bordered align-middle mb-3">
-          <thead class="table-light">
-            <tr><th>Student</th><th>Grade</th></tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let student of students">
-              <td>{{ student.studentName }}</td>
-              <td>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  class="form-control"
-                  [value]="student.grade ?? ''"
-                  (input)="updateGrade(student, $any($event.target).value)"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <button class="btn btn-primary" type="button" (click)="saveGrades()" [disabled]="isLoadingStudents || students.length === 0">Submit grades</button>
-      </div>
-
-      <div *ngIf="message" class="alert alert-success mt-4">{{ message }}</div>
-      <div *ngIf="error" class="alert alert-danger mt-4">{{ error }}</div>
+<section class="grades-shell">
+  <div class="page-header">
+    <div>
+      <h1>Gradebook</h1>
+      <p>Choose a course and department, then enter grades or enroll a student.</p>
     </div>
   </div>
+
+  <div class="top-grid">
+    <div class="panel">
+      <h2>Filter students</h2>
+      <div class="field-row">
+        <label>Course</label>
+        <select class="form-select" (change)="onCourseChange($any($event.target).value)" [disabled]="isLoadingCourses">
+          <option value="">Select course</option>
+          <option *ngFor="let course of courses" [value]="course.id">{{ course.name }}</option>
+        </select>
+        <small *ngIf="isLoadingCourses" class="text-muted">Loading courses...</small>
+      </div>
+      <div class="field-row">
+        <label>Department</label>
+        <select class="form-select" (change)="onDepartmentChange($any($event.target).value)" [disabled]="isLoadingDepartments">
+          <option value="">Select department</option>
+          <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+        </select>
+        <small *ngIf="isLoadingDepartments" class="text-muted">Loading departments...</small>
+      </div>
+      <div class="button-row">
+        <button class="btn btn-primary" type="button" (click)="loadStudents()" [disabled]="isLoadingStudents || !selectedCourseId || !selectedDepartmentId">
+          Show students
+        </button>
+      </div>
+      <div class="selection-summary" *ngIf="selectedCourseId || selectedDepartmentId">
+        <div *ngIf="selectedCourseId"><strong>Course:</strong> {{ courses.find(c => c.id === selectedCourseId)?.name || '—' }}</div>
+        <div *ngIf="selectedDepartmentId"><strong>Department:</strong> {{ departments.find(d => d.id === selectedDepartmentId)?.name || '—' }}</div>
+      </div>
+    </div>
+
+    <div class="panel panel-secondary">
+      <h2>Enroll student</h2>
+      <div class="field-row">
+        <label>Student</label>
+        <select class="form-select" [(ngModel)]="selectedEnrollmentStudentId" name="enrollmentStudent">
+          <option [ngValue]="null">Select student</option>
+          <option *ngFor="let student of studentsForEnrollment" [ngValue]="student.id">{{ student.name }}</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <label>Course</label>
+        <select class="form-select" [(ngModel)]="selectedEnrollmentCourseId" name="enrollmentCourse">
+          <option [ngValue]="null">Select course</option>
+          <option *ngFor="let course of courses" [ngValue]="course.id">{{ course.name }}</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <label>Department</label>
+        <select class="form-select" [(ngModel)]="selectedEnrollmentDepartmentId" name="enrollmentDepartment">
+          <option [ngValue]="null">Select department</option>
+          <option *ngFor="let department of departments" [ngValue]="department.id">{{ department.name }}</option>
+        </select>
+      </div>
+      <div class="button-row">
+        <button class="btn btn-success" type="button" (click)="enrollStudent()" [disabled]="isEnrolling">
+          {{ isEnrolling ? 'Enrolling…' : 'Enroll student' }}
+        </button>
+      </div>
+      <button class="btn btn-link text-secondary" type="button" (click)="selectedEnrollmentStudentId = null; selectedEnrollmentCourseId = null; selectedEnrollmentDepartmentId = null; enrollmentError = ''; enrollmentMessage = '';">Clear selection</button>
+      <div *ngIf="enrollmentMessage" class="alert alert-success mt-3">{{ enrollmentMessage }}</div>
+      <div *ngIf="enrollmentError" class="alert alert-danger mt-3">{{ enrollmentError }}</div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoadingStudents" class="status-banner alert alert-info">Loading students for selected course and department...</div>
+  <div *ngIf="!isLoadingStudents && info" class="status-banner alert alert-info">{{ info }}</div>
+  <div *ngIf="error && !enrollmentError" class="status-banner alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="students.length > 0" class="panel grades-table">
+    <h2>Student grades</h2>
+    <div class="table-scroll">
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th class="grade-column">Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of students">
+            <td>{{ student.studentName }}</td>
+            <td>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                class="form-control"
+                [value]="student.grade ?? ''"
+                (input)="updateGrade(student, $any($event.target).value)"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="button-row mt-3">
+      <button class="btn btn-primary" type="button" (click)="saveGrades()" [disabled]="isLoadingStudents || students.length === 0">Submit grades</button>
+    </div>
+  </div>
+
+  <div *ngIf="message" class="status-banner alert alert-success">{{ message }}</div>
 </section>

@@ -56,12 +56,12 @@ export class CourseListComponent implements OnInit {
     this.loadData();
   }
 
-  loadData(): void {
-    this.appDataService.loadCourses().subscribe({
+  loadData(forceReload = false): void {
+    this.appDataService.loadCourses(forceReload).subscribe({
       next: (courses) => (this.courses = courses),
       error: (err) => (this.error = err?.error?.message || 'Unable to load courses.')
     });
-    this.appDataService.loadDepartments().subscribe({
+    this.appDataService.loadDepartments(forceReload).subscribe({
       next: (departments) => (this.departments = departments),
       error: (err) => (this.error = err?.error?.message || 'Unable to load departments.')
     });
@@ -90,7 +90,7 @@ export class CourseListComponent implements OnInit {
       this.courseService.updateCourse(this.selectedCourse.id, payload as UpdateCourseDto).subscribe({
         next: () => {
           this.resetForm();
-          this.loadData();
+          this.loadData(true);
         },
         error: (err) => (this.error = err?.error?.message || 'Unable to update course.')
       });
@@ -98,7 +98,7 @@ export class CourseListComponent implements OnInit {
       this.courseService.createCourse(payload as CreateCourseDto).subscribe({
         next: () => {
           this.resetForm();
-          this.loadData();
+          this.loadData(true);
         },
         error: (err) => (this.error = err?.error?.message || 'Unable to create course.')
       });
@@ -110,7 +110,7 @@ export class CourseListComponent implements OnInit {
       return;
     }
     this.courseService.deleteCourse(id).subscribe({
-      next: () => this.loadData(),
+      next: () => this.loadData(true),
       error: (err) => (this.error = err?.error?.message || 'Unable to delete course.')
     });
   }
