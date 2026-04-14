@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AppDataService } from '../../core/app-data.service';
 import { DepartmentService } from '../departments/department.service';
 import { StudentService } from './student.service';
 import { CreateStudentDto, StudentDto, UpdateStudentDto } from '../../shared/models/student';
@@ -45,19 +46,25 @@ export class StudentListComponent implements OnInit {
     departmentId: ['', Validators.required]
   });
 
-  constructor(private studentService: StudentService, private departmentService: DepartmentService) {}
+  constructor(
+    private studentService: StudentService,
+    private departmentService: DepartmentService,
+    private appDataService: AppDataService
+  ) {}
 
   ngOnInit(): void {
+    this.appDataService.departments$.subscribe((departments) => (this.departments = departments));
+    this.appDataService.students$.subscribe((students) => (this.students = students));
     this.loadData();
   }
 
   loadData(): void {
-    this.departmentService.getDepartments().subscribe({
+    this.appDataService.loadDepartments().subscribe({
       next: (departments) => (this.departments = departments),
       error: (err) => (this.error = err?.error?.message || 'Could not load departments.')
     });
 
-    this.studentService.getStudents().subscribe({
+    this.appDataService.loadStudents().subscribe({
       next: (students) => (this.students = students),
       error: (err) => (this.error = err?.error?.message || 'Could not load students.')
     });

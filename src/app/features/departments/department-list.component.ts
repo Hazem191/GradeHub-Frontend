@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AppDataService } from '../../core/app-data.service';
 import { DepartmentDto } from '../../shared/models/department';
 import { CourseDto } from '../../shared/models/course';
 import { DepartmentService } from './department.service';
@@ -49,18 +50,33 @@ export class DepartmentListComponent implements OnInit {
   private fb = inject(FormBuilder);
   departmentForm = this.fb.nonNullable.group({ name: ['', Validators.required] });
 
-  constructor(private departmentService: DepartmentService, private courseService: CourseService) {}
+  constructor(
+    private departmentService: DepartmentService,
+    private courseService: CourseService,
+    private appDataService: AppDataService
+  ) {}
 
   ngOnInit(): void {
+    this.appDataService.departments$.subscribe((departments) => {
+      this.departments = departments;
+      this.updateCourseLists();
+    });
+    this.appDataService.courses$.subscribe((courses) => {
+      this.courses = courses;
+      this.updateCourseLists();
+    });
     this.loadData();
   }
 
   loadData(): void {
-    this.departmentService.getDepartments().subscribe({
-      next: (departments) => (this.departments = departments),
+    this.appDataService.loadDepartments().subscribe({
+      next: (departments) => {
+        this.departments = departments;
+        this.updateCourseLists();
+      },
       error: (err) => (this.error = err?.error?.message || 'Unable to load departments.')
     });
-    this.courseService.getCourses().subscribe({
+    this.appDataService.loadCourses().subscribe({
       next: (courses) => {
         this.courses = courses;
         this.updateCourseLists();

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AppDataService } from '../../core/app-data.service';
 import { CourseService } from './course.service';
 import { DepartmentService } from '../departments/department.service';
 import { CourseDto, CreateCourseDto, UpdateCourseDto } from '../../shared/models/course';
@@ -43,18 +44,24 @@ export class CourseListComponent implements OnInit {
     departmentId: ['']
   });
 
-  constructor(private courseService: CourseService, private departmentService: DepartmentService) {}
+  constructor(
+    private courseService: CourseService,
+    private departmentService: DepartmentService,
+    private appDataService: AppDataService
+  ) {}
 
   ngOnInit(): void {
+    this.appDataService.courses$.subscribe((courses) => (this.courses = courses));
+    this.appDataService.departments$.subscribe((departments) => (this.departments = departments));
     this.loadData();
   }
 
   loadData(): void {
-    this.courseService.getCourses().subscribe({
+    this.appDataService.loadCourses().subscribe({
       next: (courses) => (this.courses = courses),
       error: (err) => (this.error = err?.error?.message || 'Unable to load courses.')
     });
-    this.departmentService.getDepartments().subscribe({
+    this.appDataService.loadDepartments().subscribe({
       next: (departments) => (this.departments = departments),
       error: (err) => (this.error = err?.error?.message || 'Unable to load departments.')
     });

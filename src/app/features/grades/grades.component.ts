@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import { AppDataService } from '../../core/app-data.service';
 import { CourseService } from '../courses/course.service';
 import { DepartmentService } from '../departments/department.service';
 import { EnrollmentService } from './enrollment.service';
@@ -41,6 +42,7 @@ export class GradesComponent implements OnInit {
   isEnrolling = false;
 
   constructor(
+    private appDataService: AppDataService,
     private courseService: CourseService,
     private departmentService: DepartmentService,
     private enrollmentService: EnrollmentService,
@@ -48,6 +50,8 @@ export class GradesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.appDataService.courses$.subscribe((courses) => (this.courses = courses));
+    this.appDataService.departments$.subscribe((departments) => (this.departments = departments));
     this.loadCourses();
     this.loadDepartments();
     this.loadStudentsForEnrollment();
@@ -58,7 +62,7 @@ export class GradesComponent implements OnInit {
     this.info = '';
     this.isLoadingCourses = true;
 
-    this.courseService.getCourses().pipe(finalize(() => (this.isLoadingCourses = false))).subscribe({
+    this.appDataService.loadCourses().pipe(finalize(() => (this.isLoadingCourses = false))).subscribe({
       next: (courses) => (this.courses = courses),
       error: (err) => (this.error = err?.error?.message || 'Unable to load courses.')
     });
@@ -69,7 +73,7 @@ export class GradesComponent implements OnInit {
     this.info = '';
     this.isLoadingDepartments = true;
 
-    this.departmentService.getDepartments().pipe(finalize(() => (this.isLoadingDepartments = false))).subscribe({
+    this.appDataService.loadDepartments().pipe(finalize(() => (this.isLoadingDepartments = false))).subscribe({
       next: (departments) => (this.departments = departments),
       error: (err) => (this.error = err?.error?.message || 'Unable to load departments.')
     });
