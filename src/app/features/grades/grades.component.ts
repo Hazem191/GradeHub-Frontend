@@ -6,7 +6,6 @@ import { AppDataService } from '../../core/app-data.service';
 import { CourseService } from '../courses/course.service';
 import { DepartmentService } from '../departments/department.service';
 import { EnrollmentService } from './enrollment.service';
-import { StudentService } from '../students/student.service';
 import { CourseDto } from '../../shared/models/course';
 import { DepartmentDto } from '../../shared/models/department';
 import { StudentDto } from '../../shared/models/student';
@@ -47,6 +46,7 @@ export class GradesComponent implements OnInit {
   courses: CourseDto[] = [];
   departments: DepartmentDto[] = [];
   students: StudentGradeDto[] = [];
+  allStudents: StudentDto[] = [];
   studentsForEnrollment: StudentDto[] = [];
   selectedCourseId: number | null = null;
   selectedDepartmentId: number | null = null;
@@ -67,13 +67,17 @@ export class GradesComponent implements OnInit {
     private appDataService: AppDataService,
     private courseService: CourseService,
     private departmentService: DepartmentService,
-    private enrollmentService: EnrollmentService,
-    private studentService: StudentService
+    private enrollmentService: EnrollmentService
   ) {}
 
   ngOnInit(): void {
     this.appDataService.courses$.subscribe((courses) => (this.courses = courses));
     this.appDataService.departments$.subscribe((departments) => (this.departments = departments));
+    this.appDataService.students$.subscribe((students) => {
+      this.allStudents = students;
+      this.studentsForEnrollment = students;
+    });
+
     this.loadCourses();
     this.loadDepartments();
     this.loadStudentsForEnrollment();
@@ -115,9 +119,9 @@ export class GradesComponent implements OnInit {
     this.message = '';
     this.info = '';
     this.error = '';
-    this.students = [];
 
     if (this.selectedCourseId === null || this.selectedDepartmentId === null) {
+      this.students = [];
       return;
     }
 
@@ -128,8 +132,18 @@ export class GradesComponent implements OnInit {
       .pipe(finalize(() => (this.isLoadingStudents = false)))
       .subscribe({
         next: (students) => {
-          this.students = students;
-          if (students.length === 0) {
+          const enrollmentMap = new Map(students.map((item) => [item.studentId, item]));
+          const departmentStudents = this.allStudents.filter((student) => student.departmentId === this.selectedDepartmentId);
+
+          this.students = departmentStudents.map((student) => ({
+            studentId: student.id,
+            studentName: student.name,
+            courseId: this.selectedCourseId as number,
+            departmentId: this.selectedDepartmentId as number,
+            grade: enrollmentMap.get(student.id)?.grade ?? null
+          }));
+
+          if (this.students.length === 0) {
             this.info = 'No students found for this course and department.';
           }
         },
@@ -180,8 +194,11 @@ export class GradesComponent implements OnInit {
   }
 
   private loadStudentsForEnrollment(): void {
-    this.studentService.getStudents().subscribe({
-      next: (students) => (this.studentsForEnrollment = students),
+    this.appDataService.loadStudents().subscribe({
+      next: (students) => {
+        this.allStudents = students;
+        this.studentsForEnrollment = students;
+      },
       error: (err) => (this.error = err?.error?.message || 'Unable to load student list.')
     });
   }
@@ -210,6 +227,7 @@ export class GradesComponent implements OnInit {
       next: () => {
         this.message = 'Grades submitted successfully.';
         this.error = '';
+        this.loadStudents();
       },
       error: (err) => (this.error = err?.error?.message || 'Unable to submit grades.')
     });
