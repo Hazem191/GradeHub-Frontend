@@ -132,19 +132,10 @@ export class GradesComponent implements OnInit {
       .pipe(finalize(() => (this.isLoadingStudents = false)))
       .subscribe({
         next: (students) => {
-          const enrollmentMap = new Map(students.map((item) => [item.studentId, item]));
-          const departmentStudents = this.allStudents.filter((student) => student.departmentId === this.selectedDepartmentId);
-
-          this.students = departmentStudents.map((student) => ({
-            studentId: student.id,
-            studentName: student.name,
-            courseId: this.selectedCourseId as number,
-            departmentId: this.selectedDepartmentId as number,
-            grade: enrollmentMap.get(student.id)?.grade ?? null
-          }));
+          this.students = students;
 
           if (this.students.length === 0) {
-            this.info = 'No students found for this course and department.';
+            this.info = 'No enrolled students found for this course and department.';
           }
         },
         error: (err) => (this.error = err?.error?.message || 'Unable to load students for this selection.')
