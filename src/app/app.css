@@ -1,0 +1,91 @@
+.application-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand a {
+  color: #0f172a;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.brand span {
+  display: block;
+  margin-top: 0.25rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: #475569;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.nav-links a.active,
+.nav-links a:hover {
+  background: #e2e8f0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.header-actions a,
+.header-actions button {
+  border: none;
+  background: transparent;
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.header-actions .logout {
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: #ef4444;
+  color: white;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+@media (max-width: 740px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-links {
+    width: 100%;
+  }
+}

@@ -1,0 +1,64 @@
+<section class="container py-4">
+  <div class="mb-4 d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+      <h1 class="h3 mb-1">Courses</h1>
+      <p class="text-muted mb-0">Manage course catalog and department assignments.</p>
+    </div>
+    <div>
+      <button class="btn btn-outline-primary" type="button" (click)="loadData()">Refresh data</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Course catalog</h2>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr><th>Name</th><th>Department</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let course of courses">
+                  <td>{{ course.name }}</td>
+                  <td>{{ departments.find((dep) => dep.id === course.departmentId)?.name || 'Unassigned' }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary me-2" type="button" (click)="selectCourse(course)">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" type="button" (click)="deleteCourse(course.id)">Delete</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ selectedCourse ? 'Edit Course' : 'Add Course' }}</h2>
+          <form [formGroup]="courseForm" (ngSubmit)="saveCourse()">
+            <div class="mb-3">
+              <label class="form-label">Name</label>
+              <input formControlName="name" class="form-control" placeholder="Course title" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Department</label>
+              <select formControlName="departmentId" class="form-select">
+                <option value="">Unassigned</option>
+                <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+              </select>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">{{ selectedCourse ? 'Save changes' : 'Create course' }}</button>
+              <button type="button" class="btn btn-outline-secondary" *ngIf="selectedCourse" (click)="resetForm()">Cancel</button>
+            </div>
+          </form>
+          <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
